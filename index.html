@@ -1,34 +1,74 @@
-
+```html
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Shamsul Huda Sunni Madrasa - Result Portal</title>
 
 <style>
+
 body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
 .header{background:#006400;color:white;padding:20px;}
-.box{background:white;padding:20px;margin:20px auto;width:95%;max-width:1200px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+
+.box{
+background:white;
+padding:20px;
+margin:20px auto;
+width:95%;
+max-width:1200px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
 input,select{padding:8px;margin:5px;width:95%;}
-button{padding:6px 12px;margin:4px;background:#006400;color:white;border:none;cursor:pointer;}
+
+button{
+padding:6px 12px;
+margin:4px;
+background:#006400;
+color:white;
+border:none;
+cursor:pointer;
+}
+
 button:hover{background:#004d00;}
-.deleteBtn{background:red;}
-.editBtn{background:orange;}
-#adminPanel,#allSection{display:none;}
-.subjectRow{display:flex;justify-content:space-between;margin:5px 0;}
+
+.subjectRow{
+display:flex;
+justify-content:space-between;
+margin:5px 0;
+}
+
 .subjectRow input{width:48%;}
-table{width:100%;margin-top:10px;border-collapse:collapse;background:white;font-size:13px;}
+
+table{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+background:white;
+}
+
 table,th,td{border:1px solid #ccc;}
+
 th,td{padding:6px;text-align:center;}
 
-.practicalRow{background:#fff3cd;color:#b8860b;font-weight:bold;}
-.totalRow{background:#e2f0ff;font-weight:bold;}
-.statusBox{
-margin-top:15px;padding:12px;text-align:center;font-size:20px;
-font-weight:bold;border-radius:8px;width:200px;margin:auto;
-}
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
+
+.statusBox{
+margin-top:15px;
+padding:12px;
+font-size:20px;
+font-weight:bold;
+border-radius:8px;
+width:200px;
+margin:auto;
+}
+
+#adminPanel{display:none}
+
 </style>
+
 </head>
 
 <body>
@@ -39,25 +79,39 @@ font-weight:bold;border-radius:8px;width:200px;margin:auto;
 </div>
 
 <div class="box">
+
 <h3>Check Result</h3>
+
 <input type="text" id="searchRoll" placeholder="Enter Register Number">
+
 <button onclick="checkResult()">Check Result</button>
+
 <div id="result"></div>
+
 </div>
 
 <div class="box">
+
 <h3>Admin Login</h3>
+
 <input type="password" id="adminPass" placeholder="Enter Password">
+
 <button onclick="login()">Login</button>
+
 <p id="loginMsg" style="color:red;"></p>
+
 </div>
 
 <div class="box" id="adminPanel">
-<h3>Add / Edit Student</h3>
+
+<h3>Add Student</h3>
+
 <input type="text" id="roll" placeholder="Register Number">
+
 <input type="text" id="name" placeholder="Student Name">
 
 <select id="class" onchange="loadSubjects()">
+
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -71,203 +125,167 @@ font-weight:bold;border-radius:8px;width:200px;margin:auto;
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
+
 </select>
 
 <div id="subjects"></div>
+
 <button onclick="saveStudent()">Save Student</button>
+
 </div>
 
-<div class="box" id="allSection">
-<h3>All Students</h3>
-<div id="allResults"></div>
-</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
 
-var adminPassword="1234";
-var editIndex=null;
-
-var classSubjects={
-"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
-"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
-"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"6":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
-"7":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
-"8":["Duroosul Islam","Fiqhul Islam","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
-"9":["Thareekhul Islam","Al Fiqh","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
-"10":["Thareekhul Islam","Fiqh","Thazkiyathul Vildan","Practical"],
-"11":["Duroosul Islam - 1","Duroosul Islam - 2","Qura'an Hifz","Practical"],
-"12":["Thafseer","Fiqh","Practical"]
+const firebaseConfig = {
+apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
+authDomain: "madrasaresult-18fe1.firebaseapp.com",
+databaseURL: "https://madrasaresult-18fe1-default-rtdb.firebaseio.com",
+projectId: "madrasaresult-18fe1",
+storageBucket: "madrasaresult-18fe1.firebasestorage.app",
+messagingSenderId: "925755456868",
+appId: "1:925755456868:web:fe3a542ad1db35c1670e71",
+measurementId: "G-HC0CFJHYNH"
 };
 
-function getGrade(p){
-if(p>=96) return "A++";
-else if(p>=90) return "A+";
-else if(p>=80) return "A";
-else if(p>=70) return "B+";
-else if(p>=60) return "B";
-else if(p>=50) return "C+";
-else if(p>=40) return "C";
-else return "Fail";
-}
+firebase.initializeApp(firebaseConfig);
+
+var db=firebase.database();
+
+var adminPassword="1234";
+
+var classSubjects={
+
+"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
+
+"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"]
+
+};
 
 function login(){
+
 if(document.getElementById("adminPass").value===adminPassword){
+
 document.getElementById("adminPanel").style.display="block";
-document.getElementById("allSection").style.display="block";
-displayAll();
+
 }else{
-document.getElementById("loginMsg").innerHTML="Wrong Password!";
-}
+
+document.getElementById("loginMsg").innerHTML="Wrong Password";
+
 }
 
-function loadSubjects(selectedMarks=[]){
+}
+
+function loadSubjects(){
+
 var className=document.getElementById("class").value;
+
 var container=document.getElementById("subjects");
+
 container.innerHTML="";
+
 if(classSubjects[className]){
-classSubjects[className].forEach(function(sub,i){
-var markValue=selectedMarks[i]||"";
+
+classSubjects[className].forEach(function(sub){
+
 container.innerHTML+=
-"<div class='subjectRow'><input type='text' value='"+sub+"' readonly>"+
-"<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'></div>";
+
+"<div class='subjectRow'>"+
+"<input type='text' value='"+sub+"' readonly>"+
+"<input type='number' class='subMark' placeholder='Marks'>"+
+"</div>";
+
 });
-}
+
 }
 
-function getStudents(){ return JSON.parse(localStorage.getItem("students"))||[]; }
-function saveStudents(students){ localStorage.setItem("students",JSON.stringify(students)); }
+}
 
 function saveStudent(){
 
-var roll=document.getElementById("roll").value.trim();
-var name=document.getElementById("name").value.trim();
+var roll=document.getElementById("roll").value;
+
+var name=document.getElementById("name").value;
+
 var className=document.getElementById("class").value;
 
-if(roll===""||name===""||className===""){ alert("Fill all fields!"); return; }
-
 var marks=document.getElementsByClassName("subMark");
-if(marks.length===0){ alert("Select class and enter marks!"); return; }
 
-var subjectsArr=[],total=0;
+var subjectsArr=[];
+
+var total=0;
 
 for(var i=0;i<marks.length;i++){
-if(marks[i].value===""){ alert("Enter all marks!"); return; }
+
 var mark=Number(marks[i].value);
-if(mark<0||mark>100){ alert("Marks 0-100 only!"); return; }
-subjectsArr.push({name:classSubjects[className][i],mark:mark});
+
+subjectsArr.push({
+name:classSubjects[className][i],
+mark:mark
+});
+
 total+=mark;
+
 }
 
-var percentage=total/subjectsArr.length;
-var grade=getGrade(percentage);
-var status=(percentage>=40)?"PASS":"FAIL";
+var student={
 
-var student={roll,name,className,subjects:subjectsArr,total,grade,status};
+roll:roll,
+name:name,
+className:className,
+subjects:subjectsArr,
+total:total
 
-var students=getStudents();
-if(editIndex!==null){ students[editIndex]=student; editIndex=null; }
-else{ students.push(student); }
+};
 
-saveStudents(students);
-clearForm();
-displayAll();
-alert("Saved Successfully");
-}
+db.ref("students/"+roll).set(student);
 
-function displayAll(){
+alert("Student Saved");
 
-var students=getStudents();
-if(students.length===0){ document.getElementById("allResults").innerHTML="No Students"; return; }
-
-var allSubjects=[];
-students.forEach(function(s){
-s.subjects.forEach(function(sub){
-if(!allSubjects.includes(sub.name)){ allSubjects.push(sub.name); }
-});
-});
-
-var html="<table><tr><th>Register Number</th><th>Name</th><th>Class</th>";
-allSubjects.forEach(function(sub){ html+="<th>"+sub+"</th>"; });
-html+="<th>Total (Grade)</th><th>Status</th><th>Action</th></tr>";
-
-students.forEach(function(s,index){
-html+="<tr>";
-html+="<td>"+s.roll+"</td>";
-html+="<td>"+s.name+"</td>";
-html+="<td>"+s.className+"</td>";
-
-allSubjects.forEach(function(subName){
-var found=s.subjects.find(x=>x.name===subName);
-html+="<td>"+(found?found.mark:"-")+"</td>";
-});
-
-html+="<td>"+s.total+" ("+s.grade+")</td>";
-html+="<td>"+s.status+"</td>";
-html+="<td><button class='editBtn' onclick='editStudent("+index+")'>Edit</button> "+
-"<button class='deleteBtn' onclick='deleteStudent("+index+")'>Delete</button></td>";
-html+="</tr>";
-});
-
-html+="</table>";
-document.getElementById("allResults").innerHTML=html;
-}
-
-function editStudent(index){
-var students=getStudents();
-var s=students[index];
-editIndex=index;
-document.getElementById("roll").value=s.roll;
-document.getElementById("name").value=s.name;
-document.getElementById("class").value=s.className;
-loadSubjects(s.subjects.map(x=>x.mark));
-}
-
-function deleteStudent(index){
-var students=getStudents();
-students.splice(index,1);
-saveStudents(students);
-displayAll();
 }
 
 function checkResult(){
 
-var roll=document.getElementById("searchRoll").value.trim();
-var students=getStudents();
-var found=students.find(s=>s.roll===roll);
+var roll=document.getElementById("searchRoll").value;
 
-if(!found){ document.getElementById("result").innerHTML="Invalid Register Number"; return; }
+db.ref("students/"+roll).once("value",function(snapshot){
 
-var statusClass=(found.status==="PASS")?"passBox":"failBox";
+var s=snapshot.val();
+
+if(!s){
+
+document.getElementById("result").innerHTML="Invalid Register Number";
+
+return;
+
+}
 
 var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
 
-found.subjects.forEach(function(sub){
-var rowClass=sub.name.toLowerCase().includes("practical")?"class='practicalRow'":"";
-table+="<tr "+rowClass+"><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
+s.subjects.forEach(function(sub){
+
+table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
+
 });
 
-table+="<tr class='totalRow'><td>Total (Grade)</td><td>"+found.total+" ("+found.grade+")</td></tr></table>";
+table+="<tr><td>Total</td><td>"+s.total+"</td></tr></table>";
 
 document.getElementById("result").innerHTML=
-"<h3>Mark Sheet</h3>"+
-"<b>Name:</b> "+found.name+"<br>"+
-"<b>Register Number:</b> "+found.roll+"<br>"+
-"<b>Class:</b> "+found.className+"<br><br>"+
-table+
-"<div class='statusBox "+statusClass+"'>"+found.status+"</div>";
-}
 
-function clearForm(){
-document.getElementById("roll").value="";
-document.getElementById("name").value="";
-document.getElementById("class").value="";
-document.getElementById("subjects").innerHTML="";
+"<h3>"+s.name+"</h3>"+
+"Class: "+s.className+"<br>"+
+table;
+
+});
+
 }
 
 </script>
 
 </body>
 </html>
+```
+
