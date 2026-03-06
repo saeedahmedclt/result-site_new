@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
 <title>Shamsul Huda Sunni Madrasa - Result Portal</title>
 <style>
 body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
@@ -85,17 +84,18 @@ storageBucket: "madrasaresult-18fe1.firebasestorage.app",
 messagingSenderId: "925755456868",
 appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
 };
+
 firebase.initializeApp(firebaseConfig);
 var db=firebase.database();
 var adminPassword="1234";
 var editKey=null;
 
 var classSubjects={
-"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
-"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
-"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"1":["Duroosul Islam","Kithabath","Thafheemul Qur'an"],
+"2":["Duroosul Islam","Kithabath","Thajweedul Qur'an","Qura'an Hifz","Practical"],
+"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
 "6":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
 "7":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
 "8":["Duroosul Islam","Fiqhul Islam","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
@@ -104,8 +104,6 @@ var classSubjects={
 "11":["Duroosul Islam - 1","Duroosul Islam - 2","Qura'an Hifz","Practical"],
 "12":["Thafseer","Fiqh","Practical"]
 };
-
-var allSubjects=["Duroosul Islam","Kithabath","Thafheemul Qura'an","Thafseer","Fiqh","Practical"];
 
 function getGrade(m){
 if(m>=96) return "A++";
@@ -144,7 +142,7 @@ function saveStudent(){
 var roll=document.getElementById("roll").value;
 var name=document.getElementById("name").value;
 var cls=document.getElementById("class").value;
-if(!roll||!name||!cls){alert("Fill all fields"); return;}
+if(!roll || !name || !cls){alert("Fill all fields"); return;}
 var marks={},total=0,fail=false;
 classSubjects[cls].forEach(function(sub){
 var m=document.getElementById("sub_"+sub).value;
@@ -164,25 +162,27 @@ document.getElementById("roll").value="";
 document.getElementById("name").value="";
 document.getElementById("class").value="";
 document.getElementById("subjects").innerHTML="";
+editKey=null;
 }
 
 function displayAll(){
 db.ref("students").once("value",function(snapshot){
 var students=snapshot.val();
-if(!students){document.getElementById("allResults").innerHTML="No Students";return;}
+if(!students){document.getElementById("allResults").innerHTML="No Students"; return;}
 var html="<table><tr><th>Roll</th><th>Name</th><th>Class</th>";
-allSubjects.forEach(sub=>{html+="<th>"+sub+"</th>";});
-html+="<th>Total</th><th>Status</th><th>Action</th></tr>";
+html+="<th>Subjects</th><th>Total</th><th>Status</th><th>Action</th></tr>";
 Object.keys(students).forEach(function(key){
 var s=students[key];
+var subHtml="";
+classSubjects[s.className].forEach(sub=>{
+subHtml+=sub+": "+(s.marks[sub]!==undefined?s.marks[sub]:"-")+"<br>";
+});
 html+="<tr>";
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
-allSubjects.forEach(sub=>{
-html+="<td>"+(s.marks[sub]!==undefined?s.marks[sub]:"-")+"</td>";
-});
-html+="<td>"+s.total+" / "+Object.keys(s.marks).length*100+"</td>";
+html+="<td>"+subHtml+"</td>";
+html+="<td>"+s.total+" / "+classSubjects[s.className].length*100+"</td>";
 html+="<td>"+s.status+"</td>";
 html+="<td><button class='editBtn' onclick='editStudent(\""+key+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+key+"\")'>Delete</button></td>";
 html+="</tr>";
@@ -227,6 +227,5 @@ document.getElementById("result").innerHTML="<h3>"+val.name+"</h3>Roll: "+val.ro
 });
 }
 </script>
-
 </body>
 </html>
