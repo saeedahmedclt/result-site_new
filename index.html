@@ -18,7 +18,7 @@ table,th,td{border:1px solid #ccc;}
 th,td{padding:6px;text-align:center;}
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
-.statusBox{margin-top:30px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;} /* Increased top margin */
+.statusBox{margin-top:40px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;} /* Increased space from table */
 #adminPanel,#allSection{display:none;}
 /* Colors for All Students table */
 td.practicalCol{background:#d0e7ff;} /* Light Blue */
@@ -218,7 +218,7 @@ document.getElementById("result").innerHTML=
 "Roll: "+s.roll+"<br>"+
 "Class: "+s.className+"<br>"+
 table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>"; // space from table handled by margin-top in statusBox
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>"; // margin-top ensures space between Total and PASS/FAIL
 });
 
 }
