@@ -18,7 +18,7 @@ table,th,td{border:1px solid #ccc;}
 th,td{padding:6px;text-align:center;}
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
-.statusBox{margin-top:40px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;} /* Increased space from table */
+.statusBox{margin-top:40px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;}
 #adminPanel,#allSection{display:none;}
 /* Colors for All Students table */
 td.practicalCol{background:#d0e7ff;} /* Light Blue */
@@ -210,17 +210,16 @@ table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
 s.subjects.forEach(function(sub){
 table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td><td>"+getGrade(sub.mark)+"</td></tr>";
 });
-table+="<tr><td>Total</td><td colspan='2'><b>"+s.total+" / "+s.maxTotal+"</b></td></tr>"; // Total in bold
+table+="<tr><td>Total</td><td colspan='2'><b>"+s.total+" / "+s.maxTotal+"</b></td></tr>";
 table+="</table>";
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 document.getElementById("result").innerHTML=
 "<h3>"+s.name+"</h3>"+
-"Roll: "+s.roll+"<br>"+
+"Register Number: "+s.roll+"<br>"+  // changed label here
 "Class: "+s.className+"<br>"+
 table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>"; // margin-top ensures space between Total and PASS/FAIL
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
 });
-
 }
 
 function editStudent(roll){
