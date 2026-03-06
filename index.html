@@ -10,8 +10,8 @@ body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
 input,select{padding:8px;margin:5px;width:95%;}
 button{padding:6px 12px;margin:4px;background:#006400;color:white;border:none;cursor:pointer;}
 button:hover{background:#004d00;}
-.deleteBtn{background:red;}
-.editBtn{background:orange;}
+.deleteBtn{background:red;color:white;}
+.editBtn{background:orange;color:white;}
 .subjectRow{display:flex;justify-content:space-between;margin:5px 0;}
 .subjectRow input{width:48%;}
 table{width:100%;margin-top:10px;border-collapse:collapse;background:white;font-size:13px;}
@@ -90,7 +90,6 @@ var db=firebase.database();
 var adminPassword="1234";
 var editKey=null;
 
-// Subjects for each class
 var classSubjects={
 "1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
 "2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
@@ -106,7 +105,6 @@ var classSubjects={
 "12":["Thafseer","Fiqh","Practical"]
 };
 
-// Flattened unique subjects for table headers
 var allSubjects=["Duroosul Islam","Kithabath","Thafheemul Qura'an","Thafseer","Fiqh","Practical"];
 
 function getGrade(m){
@@ -147,15 +145,12 @@ var roll=document.getElementById("roll").value;
 var name=document.getElementById("name").value;
 var cls=document.getElementById("class").value;
 if(!roll||!name||!cls){alert("Fill all fields"); return;}
-var marks={};
-var total=0,fail=false;
-if(classSubjects[cls]){
+var marks={},total=0,fail=false;
 classSubjects[cls].forEach(function(sub){
 var m=document.getElementById("sub_"+sub).value;
 if(m===""){marks[sub]="-";}
 else{m=parseInt(m);marks[sub]=m;total+=m;if(m<40) fail=true;}
 });
-}
 var status=fail?"FAIL":"PASS";
 var student={roll,name,className:cls,marks,total,status};
 if(editKey){db.ref("students/"+editKey).set(student); editKey=null;}
@@ -184,7 +179,9 @@ html+="<tr>";
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
-allSubjects.forEach(function(sub){html+="<td>"+(s.marks[sub]!==undefined?s.marks[sub]:"-")+"</td>";});
+allSubjects.forEach(sub=>{
+html+="<td>"+(s.marks[sub]!==undefined?s.marks[sub]:"-")+"</td>";
+});
 html+="<td>"+s.total+" / "+Object.keys(s.marks).length*100+"</td>";
 html+="<td>"+s.status+"</td>";
 html+="<td><button class='editBtn' onclick='editStudent(\""+key+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+key+"\")'>Delete</button></td>";
