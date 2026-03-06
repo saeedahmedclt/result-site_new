@@ -1,48 +1,72 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
-<title>Madrasa Result System</title>
+
+<title>Shamsul Huda Sunni Madrasa - Result Portal</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#f2f2f2;
+margin:0;
+background:#f4f6f9;
+text-align:center;
+}
+
+.header{
+background:#006400;
+color:white;
 padding:20px;
 }
 
-h2{
-margin-top:30px;
+.box{
+background:white;
+padding:20px;
+margin:20px auto;
+width:95%;
+max-width:1200px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 input,select{
 padding:8px;
 margin:5px;
+width:95%;
 }
 
 button{
 padding:8px 15px;
 margin:5px;
+background:#006400;
+color:white;
+border:none;
 cursor:pointer;
 }
 
+button:hover{
+background:#004d00;
+}
+
 table{
-border-collapse:collapse;
 width:100%;
+border-collapse:collapse;
+margin-top:15px;
 background:white;
-margin-top:20px;
 font-size:13px;
 }
 
-th,td{
+table,th,td{
 border:1px solid #ccc;
+}
+
+th,td{
 padding:6px;
 text-align:center;
 }
 
 th{
-background:#eee;
+background:#eaeaea;
 }
 
 .pass{
@@ -55,37 +79,106 @@ color:red;
 font-weight:bold;
 }
 
+.subjectRow{
+display:flex;
+justify-content:space-between;
+margin:4px 0;
+}
+
+.subjectRow input{
+width:48%;
+}
+
 #adminPanel{
 display:none;
 }
 
 </style>
 
+</head>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<body>
+
+<div class="header">
+<h1>Shamsul Huda Sunni Madrasa</h1>
+<p>Official Examination Result Portal</p>
+</div>
+
+<div class="box">
+
+<h3>Check Result</h3>
+
+<input type="text" id="searchRoll" placeholder="Enter Register Number">
+<button onclick="checkResult()">Check Result</button>
+
+<div id="result"></div>
+
+</div>
+
+
+<div class="box">
+
+<h3>Admin Login</h3>
+
+<input type="password" id="adminPass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+
+</div>
+
+
+<div class="box" id="adminPanel">
+
+<h3>Add Student</h3>
+
+<input type="text" id="roll" placeholder="Register Number">
+<input type="text" id="name" placeholder="Student Name">
+
+<input type="text" id="class" placeholder="Class">
+
+<h4>Enter Marks</h4>
+
+<div id="subjectInputs"></div>
+
+<button onclick="addStudent()">Save Student</button>
+
+</div>
+
+
+<div class="box">
+
+<h3>All Students</h3>
+
+<div id="studentsTable"></div>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
 
-var firebaseConfig = {
-apiKey:"YOURKEY",
-authDomain:"YOURDOMAIN",
-databaseURL:"YOURDBURL",
-projectId:"YOURID",
-storageBucket:"",
-messagingSenderId:"",
-appId:""
+const firebaseConfig = {
+
+apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
+authDomain: "madrasaresult-18fe1.firebaseapp.com",
+databaseURL: "https://madrasaresult-18fe1-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "madrasaresult-18fe1",
+storageBucket: "madrasaresult-18fe1.firebasestorage.app",
+messagingSenderId: "925755456868",
+appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
+
 };
 
 firebase.initializeApp(firebaseConfig);
 
 var db=firebase.database();
 
-
 var adminPassword="Ubaid@321";
 
 
 var subjects=[
+
 "Duroosul Islam",
 "Kithabath",
 "Thafheemul Qura'an",
@@ -102,18 +195,19 @@ var subjects=[
 "Al Fiqh",
 "Fiqh",
 "Thafseer"
+
 ];
 
 
-function getGrade(p){
+function getGrade(m){
 
-if(p>=96) return "A++";
-else if(p>=90) return "A+";
-else if(p>=80) return "A";
-else if(p>=70) return "B+";
-else if(p>=60) return "B";
-else if(p>=50) return "C+";
-else if(p>=40) return "C";
+if(m>=96) return "A++";
+else if(m>=90) return "A+";
+else if(m>=80) return "A";
+else if(m>=70) return "B+";
+else if(m>=60) return "B";
+else if(m>=50) return "C+";
+else if(m>=40) return "C";
 else return "Fail";
 
 }
@@ -129,11 +223,32 @@ document.getElementById("adminPanel").style.display="block";
 
 }else{
 
-alert("Wrong password");
+alert("Wrong Password");
 
 }
 
 }
+
+
+
+function createInputs(){
+
+var html="";
+
+subjects.forEach(function(s){
+
+html+=
+"<div class='subjectRow'>"+
+"<input type='text' value='"+s+"' readonly>"+
+"<input type='number' id='s_"+s+"' placeholder='Marks'>"+
+"</div>";
+
+});
+
+document.getElementById("subjectInputs").innerHTML=html;
+
+}
+
 
 
 function addStudent(){
@@ -154,7 +269,9 @@ var v=document.getElementById("s_"+s)?.value;
 if(v){
 
 v=parseInt(v);
+
 marks[s]=v;
+
 total+=v;
 
 if(v<40) fail=true;
@@ -163,9 +280,7 @@ if(v<40) fail=true;
 
 });
 
-
 var status=fail?"FAIL":"PASS";
-
 
 db.ref("students/"+roll).set({
 
@@ -178,11 +293,12 @@ status:status
 
 });
 
-alert("Saved");
+alert("Student Saved");
 
 loadStudents();
 
 }
+
 
 
 function loadStudents(){
@@ -191,19 +307,31 @@ db.ref("students").once("value",function(snapshot){
 
 var data=snapshot.val();
 
+if(!data){
+
+document.getElementById("studentsTable").innerHTML="No Students";
+
+return;
+
+}
+
 var html="<table>";
 
 html+="<tr>";
+
 html+="<th>Roll</th>";
 html+="<th>Name</th>";
 html+="<th>Class</th>";
 
 subjects.forEach(function(s){
+
 html+="<th>"+s+"</th>";
+
 });
 
 html+="<th>Total</th>";
 html+="<th>Status</th>";
+
 html+="</tr>";
 
 for(var k in data){
@@ -243,6 +371,7 @@ document.getElementById("studentsTable").innerHTML=html;
 }
 
 
+
 function checkResult(){
 
 var roll=document.getElementById("searchRoll").value;
@@ -254,6 +383,7 @@ var s=snapshot.val();
 if(!s){
 
 document.getElementById("result").innerHTML="Invalid Register Number";
+
 return;
 
 }
@@ -265,6 +395,7 @@ table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
 for(var sub in s.marks){
 
 var m=s.marks[sub];
+
 var g=getGrade(m);
 
 table+="<tr>";
@@ -294,21 +425,6 @@ table+
 }
 
 
-
-function createInputs(){
-
-var html="";
-
-subjects.forEach(function(s){
-
-html+="<div>"+s+" : <input type='number' id='s_"+s+"'></div>";
-
-});
-
-document.getElementById("subjectInputs").innerHTML=html;
-
-}
-
 window.onload=function(){
 
 createInputs();
@@ -318,62 +434,5 @@ loadStudents();
 
 </script>
 
-
-</head>
-
-
-<body>
-
-
-<h2>Check Result</h2>
-
-<input id="searchRoll" placeholder="Register Number">
-
-<button onclick="checkResult()">Check</button>
-
-<div id="result"></div>
-
-
-
-<h2>Admin Login</h2>
-
-<input type="password" id="adminPass" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-
-
-<div id="adminPanel">
-
-
-<h2>Add Student</h2>
-
-Roll<br>
-<input id="roll"><br>
-
-Name<br>
-<input id="name"><br>
-
-Class<br>
-<input id="class"><br>
-
-
-<h3>Marks</h3>
-
-<div id="subjectInputs"></div>
-
-
-<button onclick="addStudent()">Save Student</button>
-
-
-<h2>All Students</h2>
-
-<div id="studentsTable"></div>
-
-
-</div>
-
-
 </body>
 </html>
-```
