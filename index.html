@@ -94,7 +94,6 @@ margin:auto;
 <h3>Check Result</h3>
 
 <input type="text" id="searchRoll" placeholder="Enter Register Number">
-
 <button onclick="checkResult()">Check Result</button>
 
 <div id="result"></div>
@@ -106,7 +105,6 @@ margin:auto;
 <h3>Admin Login</h3>
 
 <input type="password" id="adminPass" placeholder="Enter Password">
-
 <button onclick="login()">Login</button>
 
 <p id="loginMsg" style="color:red;"></p>
@@ -152,20 +150,16 @@ margin:auto;
 
 </div>
 
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
 
 const firebaseConfig = {
-apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
-authDomain: "madrasaresult-18fe1.firebaseapp.com",
-databaseURL: "https://madrasaresult-18fe1-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "madrasaresult-18fe1",
-storageBucket: "madrasaresult-18fe1.firebasestorage.app",
-messagingSenderId: "925755456868",
-appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
+apiKey: "APIKEY",
+authDomain: "DOMAIN",
+databaseURL: "DBURL",
+projectId: "PID"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -176,17 +170,7 @@ var adminPassword="1234";
 
 var classSubjects={
 
-"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
-"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
-"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
 "6":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
-"7":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
-"8":["Duroosul Islam","Fiqhul Islam","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
-"9":["Thareekhul Islam","Al Fiqh","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
-"10":["Thareekhul Islam","Fiqh","Thazkiyathul Vildan","Practical"],
-"11":["Duroosul Islam - 1","Duroosul Islam - 2","Qura'an Hifz","Practical"],
 "12":["Thafseer","Fiqh","Practical"]
 
 };
@@ -222,9 +206,7 @@ document.getElementById("loginMsg").innerHTML="Wrong Password";
 function loadSubjects(){
 
 var className=document.getElementById("class").value;
-
 var container=document.getElementById("subjects");
-
 container.innerHTML="";
 
 if(classSubjects[className]){
@@ -234,7 +216,7 @@ classSubjects[className].forEach(function(sub){
 container.innerHTML+=
 "<div class='subjectRow'>"+
 "<input type='text' value='"+sub+"' readonly>"+
-"<input type='number' class='subMark' min='0' max='100' placeholder='Marks'>"+
+"<input type='number' class='subMark' min='0' max='100'>"+
 "</div>";
 
 });
@@ -245,14 +227,9 @@ container.innerHTML+=
 
 function saveStudent(){
 
-var roll=document.getElementById("roll").value.trim();
-var name=document.getElementById("name").value.trim();
+var roll=document.getElementById("roll").value;
+var name=document.getElementById("name").value;
 var className=document.getElementById("class").value;
-
-if(roll=="" || name=="" || className==""){
-alert("Fill all fields");
-return;
-}
 
 var marks=document.getElementsByClassName("subMark");
 
@@ -263,12 +240,6 @@ var fail=false;
 for(var i=0;i<marks.length;i++){
 
 var mark=Number(marks[i].value);
-
-if(mark<0 || mark>100 || marks[i].value==""){
-alert("Enter valid marks 0-100");
-return;
-}
-
 var grade=getGrade(mark);
 
 if(mark<40) fail=true;
@@ -296,8 +267,6 @@ status
 
 db.ref("students/"+roll).set(student);
 
-alert("Student Saved");
-
 displayAll();
 
 }
@@ -315,7 +284,15 @@ return;
 
 var html="<table>";
 
-html+="<tr><th>Roll</th><th>Name</th><th>Class</th><th>Total</th><th>Status</th><th>Action</th></tr>";
+html+="<tr><th>Roll</th><th>Name</th><th>Class</th>";
+
+var firstStudent=Object.values(students)[0];
+
+firstStudent.subjects.forEach(function(sub){
+html+="<th>"+sub.name+"</th>";
+});
+
+html+="<th>Total</th><th>Status</th><th>Action</th></tr>";
 
 Object.values(students).forEach(function(s){
 
@@ -326,6 +303,11 @@ html+="<tr>";
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
+
+s.subjects.forEach(function(sub){
+html+="<td>"+sub.mark+"</td>";
+});
+
 html+="<td>"+s.total+" / "+maxTotal+"</td>";
 html+="<td>"+s.status+"</td>";
 
@@ -343,6 +325,13 @@ html+="</table>";
 document.getElementById("allResults").innerHTML=html;
 
 });
+
+}
+
+function deleteStudent(roll){
+
+db.ref("students/"+roll).remove();
+displayAll();
 
 }
 
@@ -372,21 +361,9 @@ marks[i].value=sub.mark;
 
 }
 
-function deleteStudent(roll){
-
-if(confirm("Delete student?")){
-
-db.ref("students/"+roll).remove();
-
-displayAll();
-
-}
-
-}
-
 function checkResult(){
 
-var roll=document.getElementById("searchRoll").value.trim();
+var roll=document.getElementById("searchRoll").value;
 
 db.ref("students/"+roll).once("value",function(snapshot){
 
@@ -397,8 +374,7 @@ document.getElementById("result").innerHTML="Invalid Register Number";
 return;
 }
 
-var totalSubjects=s.subjects.length;
-var maxTotal=totalSubjects*100;
+var maxTotal=s.subjects.length*100;
 
 var table="<table>";
 table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
@@ -413,14 +389,9 @@ table+="</tr>";
 
 });
 
-table+="<tr>";
-table+="<td><b>Total</b></td>";
-table+="<td colspan='2'><b>"+s.total+" / "+maxTotal+"</b></td>";
-table+="</tr>";
+table+="<tr><td><b>Total</b></td><td colspan='2'><b>"+s.total+" / "+maxTotal+"</b></td></tr>";
 
 table+="</table>";
-
-var statusClass=s.status=="PASS"?"passBox":"failBox";
 
 document.getElementById("result").innerHTML=
 
@@ -429,7 +400,7 @@ document.getElementById("result").innerHTML=
 "<b>Register Number:</b> "+s.roll+"<br>"+
 "<b>Class:</b> "+s.className+"<br><br>"+
 table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
+"<div class='statusBox'>"+s.status+"</div>";
 
 });
 
