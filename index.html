@@ -2,7 +2,6 @@
 <html>
 <head>
 <title>Shamsul Huda Sunni Madrasa - Result Portal</title>
-
 <style>
 body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
 .header{background:#006400;color:white;padding:20px;}
@@ -21,12 +20,12 @@ th,td{padding:6px;text-align:center;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
 .statusBox{margin-top:15px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;}
 #adminPanel,#allSection{display:none;}
+/* NEW COLORS FOR STUDENT TABLE */
+td.practicalCol{background:#d0e7ff;} /* Light Blue */
+td.totalCol{background:#d4f4d4;}     /* Light Green */
 </style>
-
 </head>
-
 <body>
-
 <div class="header">
 <h1>Shamsul Huda Sunni Madrasa</h1>
 <p>Official Examination Result Portal</p>
@@ -48,10 +47,8 @@ th,td{padding:6px;text-align:center;}
 
 <div class="box" id="adminPanel">
 <h3>Add / Edit Student</h3>
-
 <input type="text" id="roll" placeholder="Register Number">
 <input type="text" id="name" placeholder="Student Name">
-
 <select id="class" onchange="loadSubjects()">
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
@@ -67,9 +64,7 @@ th,td{padding:6px;text-align:center;}
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
 </select>
-
 <div id="subjects"></div>
-
 <button onclick="saveStudent()">Save Student</button>
 </div>
 
@@ -81,7 +76,6 @@ th,td{padding:6px;text-align:center;}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
 apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
@@ -92,11 +86,9 @@ storageBucket: "madrasaresult-18fe1.firebasestorage.app",
 messagingSenderId: "925755456868",
 appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
 };
-
 firebase.initializeApp(firebaseConfig);
 var db=firebase.database();
 var adminPassword="Ubaid@321";
-
 var classSubjects={
 "1":["Duroosul Islam","Kithabath","Thafheemul Quraan"],
 "2":["Duroosul Islam","Kithabath","Thajweedul Quraan","Quraan Hifz","Practical"],
@@ -140,8 +132,7 @@ container.innerHTML="";
 if(classSubjects[cls]){
 classSubjects[cls].forEach(function(sub,i){
 var markValue=selectedMarks[i]||"";
-container.innerHTML+=
-"<div class='subjectRow'>"+
+container.innerHTML+= "<div class='subjectRow'>"+
 "<input type='text' value='"+sub+"' readonly>"+
 "<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
 "</div>";
@@ -153,49 +144,24 @@ function saveStudent(){
 var roll=document.getElementById("roll").value;
 var name=document.getElementById("name").value;
 var cls=document.getElementById("class").value;
-
 if(!roll || !name || !cls){
-alert("Fill all fields");
-return;
+alert("Fill all fields"); return;
 }
-
-var subjectsArr=[];
-var total=0;
-var fail=false;
+var subjectsArr=[]; var total=0; var fail=false;
 var marks=document.getElementsByClassName("subMark");
-
 for(var i=0;i<marks.length;i++){
 var m=Number(marks[i].value);
-
-/* VALIDATION ADDED */
+/* VALIDATION: Marks cannot be >100 or <0 */
 if(m>100 || m<0){
 alert("Marks must be between 0 and 100");
 marks[i].focus();
 return;
 }
-
-subjectsArr.push({
-name:classSubjects[cls][i],
-mark:m,
-grade:getGrade(m)
-});
-
-total+=m;
-if(m<40) fail=true;
+subjectsArr.push({ name:classSubjects[cls][i], mark:m, grade:getGrade(m) });
+total+=m; if(m<40) fail=true;
 }
-
 var status=fail?"FAIL":"PASS";
-
-var student={
-roll:roll,
-name:name,
-className:cls,
-subjects:subjectsArr,
-total:total,
-maxTotal:marks.length*100,
-status:status
-};
-
+var student={ roll:roll, name:name, className:cls, subjects:subjectsArr, total:total, maxTotal:marks.length*100, status:status };
 db.ref("students/"+roll).set(student);
 alert("Student Saved!");
 displayAll();
@@ -211,198 +177,116 @@ document.getElementById("subjects").innerHTML="";
 
 function displayAll(){
 var allSubjects=new Set();
-Object.values(classSubjects).forEach(arr=>{
-arr.forEach(s=>allSubjects.add(s));
-});
+Object.values(classSubjects).forEach(arr=>{ arr.forEach(s=>allSubjects.add(s)); });
 allSubjects=[...allSubjects];
-
 db.ref("students").once("value",function(snapshot){
-
 var students=snapshot.val();
-
-if(!students){
-document.getElementById("allResults").innerHTML="No Students";
-return;
-}
-
+if(!students){ document.getElementById("allResults").innerHTML="No Students"; return; }
 var html="<table>";
-
 html+="<tr>";
 html+="<th>Roll</th>";
 html+="<th>Name</th>";
 html+="<th>Class</th>";
-
-allSubjects.forEach(sub=>{
-html+="<th>"+sub+"</th>";
-});
-
+allSubjects.forEach(sub=>{ html+="<th>"+sub+"</th>"; });
 html+="<th>Total</th>";
 html+="<th>Status</th>";
 html+="<th>Action</th>";
 html+="</tr>";
 
 Object.keys(students).forEach(function(key){
-
 var s=students[key];
 var marksMap={};
-
-s.subjects.forEach(sub=>{
-marksMap[sub.name]=sub.mark;
-});
-
+s.subjects.forEach(sub=>{ marksMap[sub.name]=sub.mark; });
 html+="<tr>";
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
-
 allSubjects.forEach(sub=>{
-html+="<td>"+(marksMap[sub]!==undefined?marksMap[sub]:"-")+"</td>";
+var cls="";
+if(sub.toLowerCase()=="practical") cls="practicalCol";
+html+="<td class='"+cls+"'>"+(marksMap[sub]!==undefined?marksMap[sub]:"-")+"</td>";
 });
-
-html+="<td>"+s.total+" / "+s.maxTotal+"</td>";
+html+="<td class='totalCol'>"+s.total+" / "+s.maxTotal+"</td>";
 html+="<td>"+s.status+"</td>";
-
 html+="<td><button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button></td>";
-
 html+="</tr>";
-
 });
-
 html+="</table>";
-
 document.getElementById("allResults").innerHTML=html;
-
 });
-
 }
 
 function checkResult(){
-
 var roll=document.getElementById("searchRoll").value;
-
 db.ref("students/"+roll).once("value").then(snapshot=>{
-
 var s=snapshot.val();
-
-if(!s){
-document.getElementById("result").innerHTML="Invalid Register Number";
-return;
-}
-
+if(!s){ document.getElementById("result").innerHTML="Invalid Register Number"; return; }
 var table="<table>";
-
 table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
-
 s.subjects.forEach(function(sub){
-
 table+="<tr>";
 table+="<td>"+sub.name+"</td>";
 table+="<td>"+sub.mark+"</td>";
 table+="<td>"+getGrade(sub.mark)+"</td>";
 table+="</tr>";
-
 });
-
 table+="<tr><td>Total</td><td colspan='2'>"+s.total+" / "+s.maxTotal+"</td></tr>";
-table+="</table>";
-
 var statusClass=s.status=="PASS"?"passBox":"failBox";
-
 document.getElementById("result").innerHTML=
 "<h3>"+s.name+"</h3>"+
 "Roll: "+s.roll+"<br>"+
 "Class: "+s.className+
 table+
 "<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
-
 });
-
 }
 
 function editStudent(roll){
-
 db.ref("students/"+roll).once("value").then(snap=>{
-
 var s=snap.val();
-
 document.getElementById("roll").value=s.roll;
 document.getElementById("name").value=s.name;
 document.getElementById("class").value=s.className;
-
 loadSubjects(s.subjects.map(x=>x.mark));
-
 });
-
 }
 
 function deleteStudent(roll){
-
 if(confirm("Delete student?")){
-
 db.ref("students/"+roll).remove();
 displayAll();
-
 }
-
 }
 
 function downloadCSV(){
-
 db.ref("students").once("value").then(snapshot=>{
-
 var students=snapshot.val();
-
-if(!students){
-alert("No data to download");
-return;
-}
-
+if(!students){ alert("No data to download"); return; }
 var allSubjects=new Set();
-
-Object.values(classSubjects).forEach(arr=>{
-arr.forEach(s=>allSubjects.add(s));
-});
-
+Object.values(classSubjects).forEach(arr=>{ arr.forEach(s=>allSubjects.add(s)); });
 allSubjects=[...allSubjects];
-
 var csv="Roll,Name,Class,"+allSubjects.join(",")+",Total,Status\n";
-
 Object.keys(students).forEach(key=>{
-
 var s=students[key];
 var marksMap={};
-
-s.subjects.forEach(sub=>{
-marksMap[sub.name]=sub.mark;
-});
-
+s.subjects.forEach(sub=>{ marksMap[sub.name]=sub.mark; });
 var row=[s.roll,s.name,s.className];
-
 allSubjects.forEach(sub=>{
 row.push(marksMap[sub]!==undefined?marksMap[sub]:"-");
 });
-
 row.push(s.total+" / "+s.maxTotal);
 row.push(s.status);
-
 csv+=row.join(",")+"\n";
-
 });
-
 var blob=new Blob([csv],{type:"text/csv"});
 var url=URL.createObjectURL(blob);
-
 var a=document.createElement("a");
 a.href=url;
 a.download="student_list.csv";
 a.click();
-
 URL.revokeObjectURL(url);
-
 });
-
 }
 </script>
-
 </body>
 </html>
