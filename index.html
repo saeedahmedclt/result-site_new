@@ -23,6 +23,8 @@ th,td{padding:6px;text-align:center;}
 /* Colors for All Students table */
 td.practicalCol{background:#d0e7ff;} /* Light Blue */
 td.totalCol{background:#d4f4d4;}     /* Light Green */
+td.statusPass{color:#008000;font-weight:bold;} /* Green PASS */
+td.statusFail{color:red;font-weight:bold;}    /* Red FAIL */
 </style>
 </head>
 <body>
@@ -176,7 +178,7 @@ db.ref("students").once("value",function(snapshot){
 var students=snapshot.val();
 if(!students){ document.getElementById("allResults").innerHTML="No Students"; return; }
 var html="<table>";
-html+="<tr><th>Roll</th><th>Name</th><th>Class</th>";
+html+="<tr><th>Register Number</th><th>Name</th><th>Class</th>";
 allSubjects.forEach(sub=>{ html+="<th>"+sub+"</th>"; });
 html+="<th>Total</th><th>Status</th><th>Action</th></tr>";
 
@@ -191,7 +193,8 @@ if(sub.toLowerCase()=="practical") cls="practicalCol";
 html+="<td class='"+cls+"'>"+(marksMap[sub]!==undefined?marksMap[sub]:"-")+"</td>";
 });
 html+="<td class='totalCol'>"+s.total+" / "+s.maxTotal+"</td>";
-html+="<td>"+s.status+"</td>";
+var statusCls = s.status=="PASS" ? "statusPass" : "statusFail";
+html+="<td class='"+statusCls+"'>"+s.status+"</td>";
 html+="<td><button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button></td>";
 html+="</tr>";
 });
@@ -215,7 +218,7 @@ table+="</table>";
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 document.getElementById("result").innerHTML=
 "<h3>"+s.name+"</h3>"+
-"Register Number: "+s.roll+"<br>"+  // changed label here
+"Register Number: "+s.roll+"<br>"+
 "Class: "+s.className+"<br>"+
 table+
 "<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
@@ -246,7 +249,7 @@ if(!students){ alert("No data to download"); return; }
 var allSubjects=new Set();
 Object.values(classSubjects).forEach(arr=>{ arr.forEach(s=>allSubjects.add(s)); });
 allSubjects=[...allSubjects];
-var csv="Roll,Name,Class,"+allSubjects.join(",")+",Total,Status\n";
+var csv="Register Number,Name,Class,"+allSubjects.join(",")+",Total,Status\n";
 Object.keys(students).forEach(key=>{
 var s=students[key]; var marksMap={};
 s.subjects.forEach(sub=>{ marksMap[sub.name]=sub.mark; });
