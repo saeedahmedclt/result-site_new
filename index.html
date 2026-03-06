@@ -118,7 +118,6 @@ margin:auto;
 <h3>Add / Edit Student</h3>
 
 <input type="text" id="roll" placeholder="Register Number">
-
 <input type="text" id="name" placeholder="Student Name">
 
 <select id="class" onchange="loadSubjects()">
@@ -160,7 +159,6 @@ margin:auto;
 <script>
 
 const firebaseConfig = {
-
 apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
 authDomain: "madrasaresult-18fe1.firebaseapp.com",
 databaseURL: "https://madrasaresult-18fe1-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -168,16 +166,12 @@ projectId: "madrasaresult-18fe1",
 storageBucket: "madrasaresult-18fe1.firebasestorage.app",
 messagingSenderId: "925755456868",
 appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
-
 };
 
 firebase.initializeApp(firebaseConfig);
-
 var db=firebase.database();
 
 var adminPassword="1234";
-
-var editRoll=null;
 
 var classSubjects={
 
@@ -198,12 +192,14 @@ var classSubjects={
 
 function getGrade(p){
 
-if(p>=90) return "A+";
-if(p>=80) return "A";
-if(p>=70) return "B";
-if(p>=60) return "C";
-if(p>=50) return "D";
-return "F";
+if(p>=96) return "A++";
+else if(p>=90) return "A+";
+else if(p>=80) return "A";
+else if(p>=70) return "B+";
+else if(p>=60) return "B";
+else if(p>=50) return "C+";
+else if(p>=40) return "C";
+else return "Fail";
 
 }
 
@@ -224,25 +220,20 @@ document.getElementById("loginMsg").innerHTML="Wrong Password";
 
 }
 
-function loadSubjects(selectedMarks=[]){
+function loadSubjects(){
 
 var className=document.getElementById("class").value;
-
 var container=document.getElementById("subjects");
-
 container.innerHTML="";
 
 if(classSubjects[className]){
 
-classSubjects[className].forEach(function(sub,i){
-
-var markValue=selectedMarks[i]||"";
+classSubjects[className].forEach(function(sub){
 
 container.innerHTML+=
-
 "<div class='subjectRow'>"+
 "<input type='text' value='"+sub+"' readonly>"+
-"<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
+"<input type='number' class='subMark' min='0' max='100' placeholder='Marks'>"+
 "</div>";
 
 });
@@ -253,9 +244,14 @@ container.innerHTML+=
 
 function saveStudent(){
 
-var roll=document.getElementById("roll").value;
-var name=document.getElementById("name").value;
+var roll=document.getElementById("roll").value.trim();
+var name=document.getElementById("name").value.trim();
 var className=document.getElementById("class").value;
+
+if(roll=="" || name=="" || className==""){
+alert("Fill all fields");
+return;
+}
 
 var marks=document.getElementsByClassName("subMark");
 
@@ -265,7 +261,19 @@ var fail=false;
 
 for(var i=0;i<marks.length;i++){
 
-var mark=Number(marks[i].value);
+var mark=marks[i].value;
+
+if(mark==""){
+alert("Enter all marks");
+return;
+}
+
+mark=Number(mark);
+
+if(mark<0 || mark>100){
+alert("Marks must be between 0-100");
+return;
+}
 
 if(mark<40) fail=true;
 
@@ -278,22 +286,17 @@ total+=mark;
 
 }
 
-var percentage=total/subjectsArr.length;
+var totalMarks=subjectsArr.length*100;
+var percentage=(total/totalMarks)*100;
 
 var grade=getGrade(percentage);
-
 var status=fail?"FAIL":"PASS";
 
 var student={
-
-roll,
-name,
-className,
+roll,name,className,
 subjects:subjectsArr,
-total,
-grade,
-status
-
+total,totalMarks,
+grade,status
 };
 
 db.ref("students/"+roll).set(student);
@@ -310,11 +313,30 @@ db.ref("students").once("value",function(snapshot){
 
 var students=snapshot.val();
 
-if(!students){document.getElementById("allResults").innerHTML="No Students";return;}
+if(!students){
+document.getElementById("allResults").innerHTML="No Students";
+return;
+}
+
+var allSubjects=[];
+
+Object.values(students).forEach(function(s){
+s.subjects.forEach(function(sub){
+if(!allSubjects.includes(sub.name)){
+allSubjects.push(sub.name);
+}
+});
+});
 
 var html="<table>";
 
-html+="<tr><th>Roll</th><th>Name</th><th>Class</th><th>Total</th><th>Status</th><th>Action</th></tr>";
+html+="<tr><th>Register Number</th><th>Name</th><th>Class</th>";
+
+allSubjects.forEach(function(sub){
+html+="<th>"+sub+"</th>";
+});
+
+html+="<th>Total (Grade)</th><th>Status</th><th>Action</th></tr>";
 
 Object.values(students).forEach(function(s){
 
@@ -323,16 +345,23 @@ html+="<tr>";
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
-html+="<td>"+s.total+" ("+s.grade+")</td>";
+
+allSubjects.forEach(function(sub){
+
+var found=s.subjects.find(x=>x.name==sub);
+
+html+="<td>"+(found?found.mark:"-")+"</td>";
+
+});
+
+html+="<td>"+s.total+" / "+s.totalMarks+" ("+s.grade+")</td>";
+
 html+="<td>"+s.status+"</td>";
 
-html+="<td>";
-
-html+="<button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button>";
-
-html+="<button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button>";
-
-html+="</td>";
+html+="<td>"+
+"<button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button>"+
+"<button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button>"+
+"</td>";
 
 html+="</tr>";
 
@@ -353,12 +382,20 @@ db.ref("students/"+roll).once("value",function(snapshot){
 var s=snapshot.val();
 
 document.getElementById("roll").value=s.roll;
-
 document.getElementById("name").value=s.name;
-
 document.getElementById("class").value=s.className;
 
-loadSubjects(s.subjects.map(x=>x.mark));
+loadSubjects();
+
+setTimeout(function(){
+
+var marks=document.getElementsByClassName("subMark");
+
+s.subjects.forEach(function(sub,i){
+marks[i].value=sub.mark;
+});
+
+},200);
 
 });
 
@@ -385,30 +422,30 @@ db.ref("students/"+roll).once("value",function(snapshot){
 var s=snapshot.val();
 
 if(!s){
-
 document.getElementById("result").innerHTML="Invalid Register Number";
-
 return;
-
 }
 
 var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
 
 s.subjects.forEach(function(sub){
-
 table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
-
 });
 
-table+="<tr><td>Total</td><td>"+s.total+" ("+s.grade+")</td></tr></table>";
+table+="<tr><td><b>Total</b></td><td><b>"+s.total+" / "+s.totalMarks+"</b></td></tr>";
+
+table+="<tr><td><b>Grade</b></td><td><b>"+s.grade+"</b></td></tr>";
+
+table+="</table>";
 
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 
 document.getElementById("result").innerHTML=
 
-"<h3>"+s.name+"</h3>"+
-"Register Number: "+s.roll+"<br>"+
-"Class: "+s.className+
+"<h3>Mark Sheet</h3>"+
+"<b>Name:</b> "+s.name+"<br>"+
+"<b>Register Number:</b> "+s.roll+"<br>"+
+"<b>Class:</b> "+s.className+
 table+
 "<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
 
