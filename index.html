@@ -1,27 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Shamsul Huda Sunni Madrasa - Result Portal</title>
+
 <style>
+
 body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
-.header{background:#006400;color:white;padding:20px;}
-.box{background:white;padding:20px;margin:20px auto;width:95%;max-width:1200px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
-input,select{padding:8px;margin:5px;width:95%;}
-button{padding:6px 12px;margin:4px;background:#006400;color:white;border:none;cursor:pointer;}
+
+.header{
+background:#006400;
+color:white;
+padding:20px;
+}
+
+.box{
+background:white;
+padding:20px;
+margin:20px auto;
+width:95%;
+max-width:1200px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,select{
+padding:8px;
+margin:5px;
+width:95%;
+}
+
+button{
+padding:6px 12px;
+margin:4px;
+background:#006400;
+color:white;
+border:none;
+cursor:pointer;
+}
+
 button:hover{background:#004d00;}
-.deleteBtn{background:red;color:white;}
-.editBtn{background:orange;color:white;}
-.subjectRow{display:flex;justify-content:space-between;margin:5px 0;}
+
+.deleteBtn{background:red;}
+.editBtn{background:orange;}
+
+.subjectRow{
+display:flex;
+justify-content:space-between;
+margin:5px 0;
+}
+
 .subjectRow input{width:48%;}
-table{width:100%;margin-top:10px;border-collapse:collapse;background:white;font-size:13px;}
+
+table{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+background:white;
+font-size:13px;
+}
+
 table,th,td{border:1px solid #ccc;}
 th,td{padding:6px;text-align:center;}
+
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
-.statusBox{margin-top:15px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:200px;margin:auto;}
+
+.statusBox{
+margin-top:15px;
+padding:12px;
+font-size:20px;
+font-weight:bold;
+border-radius:8px;
+width:200px;
+margin:auto;
+}
+
 #adminPanel,#allSection{display:none;}
+
 </style>
+
 </head>
+
 <body>
 
 <div class="header">
@@ -30,24 +90,39 @@ th,td{padding:6px;text-align:center;}
 </div>
 
 <div class="box">
+
 <h3>Check Result</h3>
+
 <input type="text" id="searchRoll" placeholder="Enter Register Number">
+
 <button onclick="checkResult()">Check Result</button>
+
 <div id="result"></div>
+
 </div>
 
 <div class="box">
+
 <h3>Admin Login</h3>
+
 <input type="password" id="adminPass" placeholder="Enter Password">
+
 <button onclick="login()">Login</button>
+
 <p id="loginMsg" style="color:red;"></p>
+
 </div>
 
 <div class="box" id="adminPanel">
+
 <h3>Add / Edit Student</h3>
+
 <input type="text" id="roll" placeholder="Register Number">
+
 <input type="text" id="name" placeholder="Student Name">
+
 <select id="class" onchange="loadSubjects()">
+
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -61,21 +136,31 @@ th,td{padding:6px;text-align:center;}
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
+
 </select>
+
 <div id="subjects"></div>
+
 <button onclick="saveStudent()">Save Student</button>
+
 </div>
 
 <div class="box" id="allSection">
+
 <h3>All Students</h3>
+
 <div id="allResults"></div>
+
 </div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
+
 const firebaseConfig = {
+
 apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
 authDomain: "madrasaresult-18fe1.firebaseapp.com",
 databaseURL: "https://madrasaresult-18fe1-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -83,19 +168,24 @@ projectId: "madrasaresult-18fe1",
 storageBucket: "madrasaresult-18fe1.firebasestorage.app",
 messagingSenderId: "925755456868",
 appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
+
 };
 
 firebase.initializeApp(firebaseConfig);
+
 var db=firebase.database();
+
 var adminPassword="1234";
-var editKey=null;
+
+var editRoll=null;
 
 var classSubjects={
-"1":["Duroosul Islam","Kithabath","Thafheemul Qur'an"],
-"2":["Duroosul Islam","Kithabath","Thajweedul Qur'an","Qura'an Hifz","Practical"],
-"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
-"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qur'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+
+"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
+"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
+"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
 "6":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
 "7":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
 "8":["Duroosul Islam","Fiqhul Islam","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
@@ -103,129 +193,230 @@ var classSubjects={
 "10":["Thareekhul Islam","Fiqh","Thazkiyathul Vildan","Practical"],
 "11":["Duroosul Islam - 1","Duroosul Islam - 2","Qura'an Hifz","Practical"],
 "12":["Thafseer","Fiqh","Practical"]
+
 };
 
-function getGrade(m){
-if(m>=96) return "A++";
-if(m>=90) return "A+";
-if(m>=80) return "A";
-if(m>=70) return "B+";
-if(m>=60) return "B";
-if(m>=50) return "C+";
-if(m>=40) return "C";
+function getGrade(p){
+
+if(p>=90) return "A+";
+if(p>=80) return "A";
+if(p>=70) return "B";
+if(p>=60) return "C";
+if(p>=50) return "D";
 return "F";
+
 }
 
 function login(){
+
 if(document.getElementById("adminPass").value===adminPassword){
+
 document.getElementById("adminPanel").style.display="block";
 document.getElementById("allSection").style.display="block";
+
 displayAll();
+
 }else{
+
 document.getElementById("loginMsg").innerHTML="Wrong Password";
-}
+
 }
 
-function loadSubjects(selectedMarks={}){
-var cls=document.getElementById("class").value;
-var container=document.getElementById("subjects");
-container.innerHTML="";
-if(classSubjects[cls]){
-classSubjects[cls].forEach(function(sub){
-var mark=selectedMarks[sub]!==undefined?selectedMarks[sub]:"";
-container.innerHTML+="<div class='subjectRow'><input type='text' value='"+sub+"' readonly><input type='number' class='subMark' id='sub_"+sub+"' value='"+mark+"' min='0' max='100' placeholder='Marks'></div>";
-});
 }
+
+function loadSubjects(selectedMarks=[]){
+
+var className=document.getElementById("class").value;
+
+var container=document.getElementById("subjects");
+
+container.innerHTML="";
+
+if(classSubjects[className]){
+
+classSubjects[className].forEach(function(sub,i){
+
+var markValue=selectedMarks[i]||"";
+
+container.innerHTML+=
+
+"<div class='subjectRow'>"+
+"<input type='text' value='"+sub+"' readonly>"+
+"<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
+"</div>";
+
+});
+
+}
+
 }
 
 function saveStudent(){
+
 var roll=document.getElementById("roll").value;
 var name=document.getElementById("name").value;
-var cls=document.getElementById("class").value;
-if(!roll || !name || !cls){alert("Fill all fields"); return;}
-var marks={},total=0,fail=false;
-classSubjects[cls].forEach(function(sub){
-var m=document.getElementById("sub_"+sub).value;
-if(m===""){marks[sub]="-";}
-else{m=parseInt(m);marks[sub]=m;total+=m;if(m<40) fail=true;}
+var className=document.getElementById("class").value;
+
+var marks=document.getElementsByClassName("subMark");
+
+var subjectsArr=[];
+var total=0;
+var fail=false;
+
+for(var i=0;i<marks.length;i++){
+
+var mark=Number(marks[i].value);
+
+if(mark<40) fail=true;
+
+subjectsArr.push({
+name:classSubjects[className][i],
+mark:mark
 });
-var status=fail?"FAIL":"PASS";
-var student={roll,name,className:cls,marks,total,status};
-if(editKey){db.ref("students/"+editKey).set(student); editKey=null;}
-else{db.ref("students").push(student);}
-clearForm();
-displayAll();
+
+total+=mark;
+
 }
 
-function clearForm(){
-document.getElementById("roll").value="";
-document.getElementById("name").value="";
-document.getElementById("class").value="";
-document.getElementById("subjects").innerHTML="";
-editKey=null;
+var percentage=total/subjectsArr.length;
+
+var grade=getGrade(percentage);
+
+var status=fail?"FAIL":"PASS";
+
+var student={
+
+roll,
+name,
+className,
+subjects:subjectsArr,
+total,
+grade,
+status
+
+};
+
+db.ref("students/"+roll).set(student);
+
+alert("Student Saved");
+
+displayAll();
+
 }
 
 function displayAll(){
+
 db.ref("students").once("value",function(snapshot){
+
 var students=snapshot.val();
-if(!students){document.getElementById("allResults").innerHTML="No Students"; return;}
-var html="<table><tr><th>Roll</th><th>Name</th><th>Class</th>";
-html+="<th>Subjects</th><th>Total</th><th>Status</th><th>Action</th></tr>";
-Object.keys(students).forEach(function(key){
-var s=students[key];
-var subHtml="";
-classSubjects[s.className].forEach(sub=>{
-subHtml+=sub+": "+(s.marks[sub]!==undefined?s.marks[sub]:"-")+"<br>";
-});
+
+if(!students){document.getElementById("allResults").innerHTML="No Students";return;}
+
+var html="<table>";
+
+html+="<tr><th>Roll</th><th>Name</th><th>Class</th><th>Total</th><th>Status</th><th>Action</th></tr>";
+
+Object.values(students).forEach(function(s){
+
 html+="<tr>";
+
 html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
-html+="<td>"+subHtml+"</td>";
-html+="<td>"+s.total+" / "+classSubjects[s.className].length*100+"</td>";
+html+="<td>"+s.total+" ("+s.grade+")</td>";
 html+="<td>"+s.status+"</td>";
-html+="<td><button class='editBtn' onclick='editStudent(\""+key+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+key+"\")'>Delete</button></td>";
+
+html+="<td>";
+
+html+="<button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button>";
+
+html+="<button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button>";
+
+html+="</td>";
+
 html+="</tr>";
+
 });
+
 html+="</table>";
+
 document.getElementById("allResults").innerHTML=html;
+
 });
+
 }
 
-function editStudent(key){
-db.ref("students/"+key).once("value").then(snap=>{
-var s=snap.val();
+function editStudent(roll){
+
+db.ref("students/"+roll).once("value",function(snapshot){
+
+var s=snapshot.val();
+
 document.getElementById("roll").value=s.roll;
+
 document.getElementById("name").value=s.name;
+
 document.getElementById("class").value=s.className;
-loadSubjects(s.marks);
-editKey=key;
+
+loadSubjects(s.subjects.map(x=>x.mark));
+
 });
+
 }
 
-function deleteStudent(key){
-if(confirm("Delete student?")){db.ref("students/"+key).remove(); displayAll();}
+function deleteStudent(roll){
+
+if(confirm("Delete student?")){
+
+db.ref("students/"+roll).remove();
+
+displayAll();
+
+}
+
 }
 
 function checkResult(){
+
 var roll=document.getElementById("searchRoll").value;
-db.ref("students").orderByChild("roll").equalTo(roll).once("value").then(snapshot=>{
-var val=null;
-snapshot.forEach(s=>{val=s.val();});
-if(!val){document.getElementById("result").innerHTML="Invalid Register Number"; return;}
-var table="<table><tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
-var total=0,maxTotal=0;
-var clsSub=classSubjects[val.className]||[];
-clsSub.forEach(sub=>{
-var m=val.marks[sub];
-if(m!==undefined && m!=="-"){total+=m; maxTotal+=100;} else{m="-"; maxTotal+=100;}
-var g=m!=="-"?getGrade(m):"-";
-table+="<tr><td>"+sub+"</td><td>"+m+"</td><td>"+g+"</td></tr>";
-});
-table+="<tr><td><b>Total</b></td><td colspan='2'><b>"+total+" / "+maxTotal+"</b></td></tr></table>";
-document.getElementById("result").innerHTML="<h3>"+val.name+"</h3>Roll: "+val.roll+"<br>Class: "+val.className+table+"<div class='statusBox "+(val.status=="PASS"?"passBox":"failBox")+"'>"+val.status+"</div>";
-});
+
+db.ref("students/"+roll).once("value",function(snapshot){
+
+var s=snapshot.val();
+
+if(!s){
+
+document.getElementById("result").innerHTML="Invalid Register Number";
+
+return;
+
 }
+
+var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
+
+s.subjects.forEach(function(sub){
+
+table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
+
+});
+
+table+="<tr><td>Total</td><td>"+s.total+" ("+s.grade+")</td></tr></table>";
+
+var statusClass=s.status=="PASS"?"passBox":"failBox";
+
+document.getElementById("result").innerHTML=
+
+"<h3>"+s.name+"</h3>"+
+"Register Number: "+s.roll+"<br>"+
+"Class: "+s.className+
+table+
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
+
+});
+
+}
+
 </script>
+
 </body>
 </html>
