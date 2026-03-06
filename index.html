@@ -10,8 +10,8 @@ body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
 input,select{padding:8px;margin:5px;width:95%;}
 button{padding:6px 12px;margin:4px;background:#006400;color:white;border:none;cursor:pointer;}
 button:hover{background:#004d00;}
-.deleteBtn{background:red;color:white;}
-.editBtn{background:orange;color:white;}
+.deleteBtn{background:red;}
+.editBtn{background:orange;}
 .subjectRow{display:flex;justify-content:space-between;margin:5px 0;}
 .subjectRow input{width:48%;}
 table{width:100%;margin-top:10px;border-collapse:collapse;background:white;font-size:13px;}
@@ -19,7 +19,7 @@ table,th,td{border:1px solid #ccc;}
 th,td{padding:6px;text-align:center;}
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
-.statusBox{margin-top:15px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:200px;margin:auto;}
+.statusBox{margin-top:15px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;}
 #adminPanel,#allSection{display:none;}
 </style>
 
@@ -140,11 +140,21 @@ function loadSubjects(selectedMarks=[]){
 var cls=document.getElementById("class").value;
 var container=document.getElementById("subjects");
 container.innerHTML="";
+
 if(classSubjects[cls]){
+
 classSubjects[cls].forEach(function(sub,i){
+
 var markValue=selectedMarks[i]||"";
-container.innerHTML+="<div class='subjectRow'><input type='text' value='"+sub+"' readonly><input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'></div>";
+
+container.innerHTML+=
+"<div class='subjectRow'>"+
+"<input type='text' value='"+sub+"' readonly>"+
+"<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
+"</div>";
+
 });
+
 }
 }
 
@@ -177,9 +187,7 @@ grade:getGrade(m)
 
 total+=m;
 
-if(m<40){
-fail=true;
-}
+if(m<40) fail=true;
 
 }
 
@@ -191,6 +199,7 @@ name:name,
 className:cls,
 subjects:subjectsArr,
 total:total,
+maxTotal:marks.length*100,
 status:status
 };
 
@@ -199,7 +208,6 @@ db.ref("students/"+roll).set(student);
 alert("Student Saved!");
 
 displayAll();
-
 clearForm();
 
 }
@@ -266,7 +274,7 @@ allSubjects.forEach(sub=>{
 html+="<td>"+(marksMap[sub]!==undefined?marksMap[sub]:"-")+"</td>";
 });
 
-html+="<td>"+s.total+"</td>";
+html+="<td>"+s.total+" / "+s.maxTotal+"</td>";
 html+="<td>"+s.status+"</td>";
 
 html+="<td><button class='editBtn' onclick='editStudent(\""+s.roll+"\")'>Edit</button> <button class='deleteBtn' onclick='deleteStudent(\""+s.roll+"\")'>Delete</button></td>";
@@ -278,6 +286,50 @@ html+="</tr>";
 html+="</table>";
 
 document.getElementById("allResults").innerHTML=html;
+
+});
+
+}
+
+function checkResult(){
+
+var roll=document.getElementById("searchRoll").value;
+
+db.ref("students/"+roll).once("value").then(snapshot=>{
+
+var s=snapshot.val();
+
+if(!s){
+document.getElementById("result").innerHTML="Invalid Register Number";
+return;
+}
+
+var table="<table>";
+
+table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
+
+s.subjects.forEach(function(sub){
+
+table+="<tr>";
+table+="<td>"+sub.name+"</td>";
+table+="<td>"+sub.mark+"</td>";
+table+="<td>"+getGrade(sub.mark)+"</td>";
+table+="</tr>";
+
+});
+
+table+="<tr><td>Total</td><td colspan='2'>"+s.total+" / "+s.maxTotal+"</td></tr>";
+
+table+="</table>";
+
+var statusClass=s.status=="PASS"?"passBox":"failBox";
+
+document.getElementById("result").innerHTML=
+"<h3>"+s.name+"</h3>"+
+"Roll: "+s.roll+"<br>"+
+"Class: "+s.className+
+table+
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
 
 });
 
@@ -308,55 +360,6 @@ db.ref("students/"+roll).remove();
 displayAll();
 
 }
-
-}
-
-function checkResult(){
-
-var roll=document.getElementById("searchRoll").value;
-
-db.ref("students/"+roll).once("value").then(snapshot=>{
-
-var s=snapshot.val();
-
-if(!s){
-
-document.getElementById("result").innerHTML="Invalid Register Number";
-
-return;
-
-}
-
-var table="<table>";
-
-table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
-
-s.subjects.forEach(function(sub){
-
-table+="<tr>";
-
-table+="<td>"+sub.name+"</td>";
-
-table+="<td>"+sub.mark+"</td>";
-
-table+="<td>"+getGrade(sub.mark)+"</td>";
-
-table+="</tr>";
-
-});
-
-table+="<tr><td>Total</td><td colspan='2'>"+s.total+"</td></tr>";
-
-table+="</table>";
-
-var statusClass=s.status=="PASS"?"passBox":"failBox";
-
-document.getElementById("result").innerHTML=
-"<h3>"+s.name+"</h3>Roll: "+s.roll+"<br>Class: "+s.className+
-table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
-
-});
 
 }
 
