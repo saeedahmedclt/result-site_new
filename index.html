@@ -18,7 +18,7 @@ table,th,td{border:1px solid #ccc;}
 th,td{padding:6px;text-align:center;}
 .passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
 .failBox{background:#ffe6e6;color:red;border:2px solid red;}
-.statusBox{margin-top:20px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;} /* Added 20px top margin */
+.statusBox{margin-top:30px;padding:12px;font-size:20px;font-weight:bold;border-radius:8px;width:220px;margin:auto;} /* Increased top margin */
 #adminPanel,#allSection{display:none;}
 /* Colors for All Students table */
 td.practicalCol{background:#d0e7ff;} /* Light Blue */
@@ -210,7 +210,7 @@ table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
 s.subjects.forEach(function(sub){
 table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td><td>"+getGrade(sub.mark)+"</td></tr>";
 });
-table+="<tr><td>Total</td><td colspan='2'><b>"+s.total+" / "+s.maxTotal+"</b></td></tr>";
+table+="<tr><td>Total</td><td colspan='2'><b>"+s.total+" / "+s.maxTotal+"</b></td></tr>"; // Total in bold
 table+="</table>";
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 document.getElementById("result").innerHTML=
@@ -218,8 +218,9 @@ document.getElementById("result").innerHTML=
 "Roll: "+s.roll+"<br>"+
 "Class: "+s.className+"<br>"+
 table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>"; // space from table handled by margin-top in statusBox
 });
+
 }
 
 function editStudent(roll){
