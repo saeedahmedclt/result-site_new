@@ -230,14 +230,14 @@ table+="<td>"+sub.mark+"</td>";
 table+="<td>"+getGrade(sub.mark)+"</td>";
 table+="</tr>";
 });
-table+="<tr><td>Total</td><td colspan='2'>"+s.total+" / "+s.maxTotal+"</td></tr>";
+table+="<tr><td>Total</td><td colspan='2'><b>"+s.total+" / "+s.maxTotal+"</b></td></tr>"; // Total in bold
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 document.getElementById("result").innerHTML=
 "<h3>"+s.name+"</h3>"+
 "Roll: "+s.roll+"<br>"+
 "Class: "+s.className+
 table+
-"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>"; // PASS/FAIL below table
 });
 }
 
