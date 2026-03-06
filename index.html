@@ -201,6 +201,20 @@ var db=firebase.database();
 var adminPassword="1234";
 
 
+function getGrade(p){
+
+if(p>=96) return "A++";
+else if(p>=90) return "A+";
+else if(p>=80) return "A";
+else if(p>=70) return "B+";
+else if(p>=60) return "B";
+else if(p>=50) return "C+";
+else if(p>=40) return "C";
+else return "Fail";
+
+}
+
+
 var classSubjects={
 
 "1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
@@ -219,7 +233,6 @@ var classSubjects={
 };
 
 var allSubjects=[...new Set(Object.values(classSubjects).flat())];
-
 
 
 function login(){
@@ -441,13 +454,23 @@ document.getElementById("result").innerHTML="Invalid Register Number";
 return;
 }
 
-var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
+var totalMax=s.subjects.length*100;
+
+var table="<table>";
+table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
 
 s.subjects.forEach(function(sub){
-table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
+
+table+="<tr>";
+table+="<td>"+sub.name+"</td>";
+table+="<td>"+sub.mark+" / 100</td>";
+table+="<td>"+getGrade(sub.mark)+"</td>";
+table+="</tr>";
+
 });
 
-table+="<tr><td>Total</td><td>"+s.total+"</td></tr></table>";
+table+="<tr><td><b>Total</b></td><td colspan='2'><b>"+s.total+" / "+totalMax+"</b></td></tr>";
+table+="</table>";
 
 var statusClass=s.status=="PASS"?"passBox":"failBox";
 
