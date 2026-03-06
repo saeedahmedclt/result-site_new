@@ -19,7 +19,7 @@ background:white;
 padding:20px;
 margin:20px auto;
 width:95%;
-max-width:1200px;
+max-width:1400px;
 border-radius:10px;
 box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
@@ -57,7 +57,7 @@ width:100%;
 margin-top:10px;
 border-collapse:collapse;
 background:white;
-font-size:13px;
+font-size:12px;
 }
 
 table,th,td{border:1px solid #ccc;}
@@ -119,7 +119,6 @@ margin:auto;
 <input type="text" id="name" placeholder="Student Name">
 
 <select id="class" onchange="loadSubjects()">
-
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -133,7 +132,6 @@ margin:auto;
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
-
 </select>
 
 <div id="subjects"></div>
@@ -145,7 +143,6 @@ margin:auto;
 <div class="box" id="allSection">
 
 <h3>All Students</h3>
-
 <div id="allResults"></div>
 
 </div>
@@ -156,35 +153,40 @@ margin:auto;
 <script>
 
 const firebaseConfig = {
-apiKey: "APIKEY",
-authDomain: "DOMAIN",
-databaseURL: "DBURL",
-projectId: "PID"
+
+apiKey: "AIzaSyDg2bMhZMw9L26mgsSh5-DVUv7ZDzO3GBU",
+authDomain: "madrasaresult-18fe1.firebaseapp.com",
+databaseURL: "https://madrasaresult-18fe1-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "madrasaresult-18fe1",
+storageBucket: "madrasaresult-18fe1.firebasestorage.app",
+messagingSenderId: "925755456868",
+appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
+
 };
 
 firebase.initializeApp(firebaseConfig);
-
 var db=firebase.database();
 
 var adminPassword="1234";
 
 var classSubjects={
 
+"1":["Duroosul Islam","Kithabath","Thafheemul Qura'an"],
+"2":["Duroosul Islam","Kithabath","Thajweedul Qura'an","Qura'an Hifz","Practical"],
+"3":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"4":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
+"5":["Duroosul Islam - 1","Duroosul Islam - 2","Thajweedul Qura'an","Fiqhul Islam","Qura'an Hifz","Practical"],
 "6":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
+"7":["Duroosul Aqaed","Thareekhul Islam","Thajweedul & Thazkiya","Fiqhul Islam","Qura'an Hifz","Practical"],
+"8":["Duroosul Islam","Fiqhul Islam","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
+"9":["Thareekhul Islam","Al Fiqh","Thazkiyathul Vildan","Qura'an Hifz","Practical"],
+"10":["Thareekhul Islam","Fiqh","Thazkiyathul Vildan","Practical"],
+"11":["Duroosul Islam - 1","Duroosul Islam - 2","Qura'an Hifz","Practical"],
 "12":["Thafseer","Fiqh","Practical"]
 
 };
 
-function getGrade(mark){
-
-if(mark>=90) return "A+";
-if(mark>=80) return "A";
-if(mark>=70) return "B";
-if(mark>=60) return "C";
-if(mark>=50) return "D";
-return "F";
-
-}
+var allSubjects=[...new Set(Object.values(classSubjects).flat())];
 
 function login(){
 
@@ -203,20 +205,23 @@ document.getElementById("loginMsg").innerHTML="Wrong Password";
 
 }
 
-function loadSubjects(){
+function loadSubjects(selectedMarks=[]){
 
 var className=document.getElementById("class").value;
 var container=document.getElementById("subjects");
+
 container.innerHTML="";
 
 if(classSubjects[className]){
 
-classSubjects[className].forEach(function(sub){
+classSubjects[className].forEach(function(sub,i){
+
+var markValue=selectedMarks[i]||"";
 
 container.innerHTML+=
 "<div class='subjectRow'>"+
 "<input type='text' value='"+sub+"' readonly>"+
-"<input type='number' class='subMark' min='0' max='100'>"+
+"<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
 "</div>";
 
 });
@@ -240,14 +245,12 @@ var fail=false;
 for(var i=0;i<marks.length;i++){
 
 var mark=Number(marks[i].value);
-var grade=getGrade(mark);
 
 if(mark<40) fail=true;
 
 subjectsArr.push({
 name:classSubjects[className][i],
-mark:mark,
-grade:grade
+mark:mark
 });
 
 total+=mark;
@@ -267,6 +270,8 @@ status
 
 db.ref("students/"+roll).set(student);
 
+alert("Student Saved");
+
 displayAll();
 
 }
@@ -284,19 +289,27 @@ return;
 
 var html="<table>";
 
-html+="<tr><th>Roll</th><th>Name</th><th>Class</th>";
+html+="<tr>";
+html+="<th>Roll</th>";
+html+="<th>Name</th>";
+html+="<th>Class</th>";
 
-var firstStudent=Object.values(students)[0];
-
-firstStudent.subjects.forEach(function(sub){
-html+="<th>"+sub.name+"</th>";
+allSubjects.forEach(function(sub){
+html+="<th>"+sub+"</th>";
 });
 
-html+="<th>Total</th><th>Status</th><th>Action</th></tr>";
+html+="<th>Total</th>";
+html+="<th>Status</th>";
+html+="<th>Action</th>";
+html+="</tr>";
 
 Object.values(students).forEach(function(s){
 
-var maxTotal=s.subjects.length*100;
+var subjectMap={};
+
+s.subjects.forEach(function(sub){
+subjectMap[sub.name]=sub.mark;
+});
 
 html+="<tr>";
 
@@ -304,11 +317,13 @@ html+="<td>"+s.roll+"</td>";
 html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
 
-s.subjects.forEach(function(sub){
-html+="<td>"+sub.mark+"</td>";
+allSubjects.forEach(function(sub){
+
+html+="<td>"+(subjectMap[sub]!==undefined?subjectMap[sub]:"-")+"</td>";
+
 });
 
-html+="<td>"+s.total+" / "+maxTotal+"</td>";
+html+="<td>"+s.total+"</td>";
 html+="<td>"+s.status+"</td>";
 
 html+="<td>";
@@ -328,13 +343,6 @@ document.getElementById("allResults").innerHTML=html;
 
 }
 
-function deleteStudent(roll){
-
-db.ref("students/"+roll).remove();
-displayAll();
-
-}
-
 function editStudent(roll){
 
 db.ref("students/"+roll).once("value",function(snapshot){
@@ -345,19 +353,20 @@ document.getElementById("roll").value=s.roll;
 document.getElementById("name").value=s.name;
 document.getElementById("class").value=s.className;
 
-loadSubjects();
-
-setTimeout(function(){
-
-var marks=document.getElementsByClassName("subMark");
-
-s.subjects.forEach(function(sub,i){
-marks[i].value=sub.mark;
-});
-
-},200);
+loadSubjects(s.subjects.map(x=>x.mark));
 
 });
+
+}
+
+function deleteStudent(roll){
+
+if(confirm("Delete student?")){
+
+db.ref("students/"+roll).remove();
+displayAll();
+
+}
 
 }
 
@@ -370,37 +379,31 @@ db.ref("students/"+roll).once("value",function(snapshot){
 var s=snapshot.val();
 
 if(!s){
+
 document.getElementById("result").innerHTML="Invalid Register Number";
 return;
+
 }
 
-var maxTotal=s.subjects.length*100;
-
-var table="<table>";
-table+="<tr><th>Subject</th><th>Mark</th><th>Grade</th></tr>";
+var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
 
 s.subjects.forEach(function(sub){
 
-table+="<tr>";
-table+="<td>"+sub.name+"</td>";
-table+="<td>"+sub.mark+"</td>";
-table+="<td>"+sub.grade+"</td>";
-table+="</tr>";
+table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
 
 });
 
-table+="<tr><td><b>Total</b></td><td colspan='2'><b>"+s.total+" / "+maxTotal+"</b></td></tr>";
+table+="<tr><td>Total</td><td>"+s.total+"</td></tr></table>";
 
-table+="</table>";
+var statusClass=s.status=="PASS"?"passBox":"failBox";
 
 document.getElementById("result").innerHTML=
 
-"<h3>Mark Sheet</h3>"+
-"<b>Name:</b> "+s.name+"<br>"+
-"<b>Register Number:</b> "+s.roll+"<br>"+
-"<b>Class:</b> "+s.className+"<br><br>"+
+"<h3>"+s.name+"</h3>"+
+"Register Number: "+s.roll+"<br>"+
+"Class: "+s.className+
 table+
-"<div class='statusBox'>"+s.status+"</div>";
+"<div class='statusBox "+statusClass+"'>"+s.status+"</div>";
 
 });
 
