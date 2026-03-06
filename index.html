@@ -6,7 +6,12 @@
 
 <style>
 
-body{font-family:Arial;margin:0;background:#f4f6f9;text-align:center;}
+body{
+font-family:Arial;
+margin:0;
+background:#f4f6f9;
+text-align:center;
+}
 
 .header{
 background:#006400;
@@ -61,10 +66,23 @@ font-size:12px;
 }
 
 table,th,td{border:1px solid #ccc;}
-th,td{padding:6px;text-align:center;}
 
-.passBox{background:#e6ffe6;color:#008000;border:2px solid #008000;}
-.failBox{background:#ffe6e6;color:red;border:2px solid red;}
+th,td{
+padding:6px;
+text-align:center;
+}
+
+.passBox{
+background:#e6ffe6;
+color:#008000;
+border:2px solid #008000;
+}
+
+.failBox{
+background:#ffe6e6;
+color:red;
+border:2px solid red;
+}
 
 .statusBox{
 margin-top:15px;
@@ -76,7 +94,9 @@ width:200px;
 margin:auto;
 }
 
-#adminPanel,#allSection{display:none;}
+#adminPanel,#allSection{
+display:none;
+}
 
 </style>
 
@@ -89,6 +109,7 @@ margin:auto;
 <p>Official Examination Result Portal</p>
 </div>
 
+
 <div class="box">
 
 <h3>Check Result</h3>
@@ -99,6 +120,7 @@ margin:auto;
 <div id="result"></div>
 
 </div>
+
 
 <div class="box">
 
@@ -111,6 +133,7 @@ margin:auto;
 
 </div>
 
+
 <div class="box" id="adminPanel">
 
 <h3>Add / Edit Student</h3>
@@ -119,6 +142,7 @@ margin:auto;
 <input type="text" id="name" placeholder="Student Name">
 
 <select id="class" onchange="loadSubjects()">
+
 <option value="">Select Class</option>
 <option value="1">Class 1</option>
 <option value="2">Class 2</option>
@@ -132,6 +156,7 @@ margin:auto;
 <option value="10">Class 10</option>
 <option value="11">Class 11</option>
 <option value="12">Class 12</option>
+
 </select>
 
 <div id="subjects"></div>
@@ -140,15 +165,20 @@ margin:auto;
 
 </div>
 
+
 <div class="box" id="allSection">
 
 <h3>All Students</h3>
+
 <div id="allResults"></div>
 
 </div>
 
+
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 
 <script>
 
@@ -165,9 +195,11 @@ appId: "1:925755456868:web:fe3a542ad1db35c1670e71"
 };
 
 firebase.initializeApp(firebaseConfig);
+
 var db=firebase.database();
 
 var adminPassword="1234";
+
 
 var classSubjects={
 
@@ -188,9 +220,13 @@ var classSubjects={
 
 var allSubjects=[...new Set(Object.values(classSubjects).flat())];
 
+
+
 function login(){
 
-if(document.getElementById("adminPass").value===adminPassword){
+var pass=document.getElementById("adminPass").value.trim();
+
+if(pass===adminPassword){
 
 document.getElementById("adminPanel").style.display="block";
 document.getElementById("allSection").style.display="block";
@@ -204,6 +240,8 @@ document.getElementById("loginMsg").innerHTML="Wrong Password";
 }
 
 }
+
+
 
 function loadSubjects(selectedMarks=[]){
 
@@ -219,6 +257,7 @@ classSubjects[className].forEach(function(sub,i){
 var markValue=selectedMarks[i]||"";
 
 container.innerHTML+=
+
 "<div class='subjectRow'>"+
 "<input type='text' value='"+sub+"' readonly>"+
 "<input type='number' class='subMark' value='"+markValue+"' min='0' max='100' placeholder='Marks'>"+
@@ -230,11 +269,18 @@ container.innerHTML+=
 
 }
 
+
+
 function saveStudent(){
 
 var roll=document.getElementById("roll").value;
 var name=document.getElementById("name").value;
 var className=document.getElementById("class").value;
+
+if(!roll||!name||!className){
+alert("Fill all fields");
+return;
+}
 
 var marks=document.getElementsByClassName("subMark");
 
@@ -245,6 +291,11 @@ var fail=false;
 for(var i=0;i<marks.length;i++){
 
 var mark=Number(marks[i].value);
+
+if(marks[i].value===""){
+alert("Enter all marks");
+return;
+}
 
 if(mark<40) fail=true;
 
@@ -275,6 +326,8 @@ alert("Student Saved");
 displayAll();
 
 }
+
+
 
 function displayAll(){
 
@@ -318,9 +371,7 @@ html+="<td>"+s.name+"</td>";
 html+="<td>"+s.className+"</td>";
 
 allSubjects.forEach(function(sub){
-
 html+="<td>"+(subjectMap[sub]!==undefined?subjectMap[sub]:"-")+"</td>";
-
 });
 
 html+="<td>"+s.total+"</td>";
@@ -343,6 +394,8 @@ document.getElementById("allResults").innerHTML=html;
 
 }
 
+
+
 function editStudent(roll){
 
 db.ref("students/"+roll).once("value",function(snapshot){
@@ -359,16 +412,21 @@ loadSubjects(s.subjects.map(x=>x.mark));
 
 }
 
+
+
 function deleteStudent(roll){
 
 if(confirm("Delete student?")){
 
 db.ref("students/"+roll).remove();
+
 displayAll();
 
 }
 
 }
+
+
 
 function checkResult(){
 
@@ -379,18 +437,14 @@ db.ref("students/"+roll).once("value",function(snapshot){
 var s=snapshot.val();
 
 if(!s){
-
 document.getElementById("result").innerHTML="Invalid Register Number";
 return;
-
 }
 
 var table="<table><tr><th>Subject</th><th>Mark</th></tr>";
 
 s.subjects.forEach(function(sub){
-
 table+="<tr><td>"+sub.name+"</td><td>"+sub.mark+"</td></tr>";
-
 });
 
 table+="<tr><td>Total</td><td>"+s.total+"</td></tr></table>";
